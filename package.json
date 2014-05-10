@@ -1,0 +1,27 @@
+{
+  "name": "tls-handshake",
+  "version": "0.0.0",
+  "description": "handshake buffer generator in pure javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape tests/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yorkie/node-tls-handshake.git"
+  },
+  "keywords": [
+    "tls",
+    "handshake",
+    "js"
+  ],
+  "author": "Yorkie Neil <yorkiefixer@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yorkie/node-tls-handshake/issues"
+  },
+  "homepage": "https://github.com/yorkie/node-tls-handshake",
+  "dependencies": {
+    "tape": "^2.12.3"
+  }
+}
