@@ -1,83 +1,100 @@
 
-var constants = require('./constants');
+var constants = require('tls-constants');
+var versions = constants.TLS.Versions;
 var types = constants.Handshake.Types;
 
+exports.HelloMessage = {
 
-
-var ClientHello = {
   /*
-   * Tls version
+   * name
+   */
+  get name () {
+    return 'HelloMessage';
+  },
+
+  /*
+   * handshake version
    */
   get version () {
     return this._version || versions['1.1'];
   },
 
   /*
-   * Tls version
+   * handshake version
    */
   set version (val) {
     this._version = versions[val] || versions['1.1'];
   },
 
   /*
-   * Tls session id
+   * handshake session id
    */
   get sessionId () {
-    return this._sessionId;
+    return this._sessionId || 0;
   },
 
   /*
-   * Tls session id
+   * handshake session id
    */
   set sessionId (val) {
     this._sessionId = val || 0;
   },
 
   /*
-   * Tls content type
+   * handshake cipher suits
    */
-  get type () {
-    return this._type || types['handshake'];
-  },
-  
-  /*
-   * Tls content type
-   */
-  set type (val) {
-    this._type = types[val] || types['handshake'];
+  get ciphers () {
+    return this._ciphers || [ 0, 0 ];
   },
 
   /*
-   * Tls fragment length
+   * handshake cipher suits
    */
-  get length () {
-    return this._length || 0;
+  set ciphers (val) {
+    if (val.length != 2) throw new Error('wrong arguments');
+    this._ciphers = val;
   },
 
   /*
-   * Tls fragment length
+   * handshake comp
    */
-  set length (val) {
-    throw new Error('internal usage');
+  get compression () {
+    return !!this._compression;
   },
 
   /*
-   * Tls fragment
+   * handshake comp
    */
-  get body () {
-    return this._body;
+  set compression (val) {
+    this._compression = !!val;
   },
 
   /*
-   * Tls fragment
+   * handshake to buffer
    */
-  set body (val) {
-    this._body = val;
-    this._length = val.length;
-  },
+  toBuffer: function() {
+    var buf = new Buffer(40);
+    buf.writeUInt8(this.version[0], 0);
+    buf.writeUInt8(this.version[1], 1);
+    writeRandom(buf, 2);
+
+    buf.writeUInt8(0, 34);
+    buf.writeUInt8(this.ciphers[0], 35);
+    buf.writeUInt8(this.ciphers[1], 36);
+    if (this.compression) {
+      buf.writeUInt8(255, 37);
+    } else {
+      buf.writeUInt8(0, 37);
+    }
+
+    buf.writeUInt8(0, 38);
+    buf.writeUInt8(0, 39);
+    return buf;
+  }
+
 };
 
-module.exports = {
+exports.Handshake = {
 
   /*
    * handshake type
@@ -118,15 +135,29 @@ module.exports = {
    * handshake body
    */
   set body (val) {
+    var body = val;
+    if (val.name == 'HelloMessage' && typeof val.toBuffer == 'function') {
+      body = val.toBuffer();
+    }
+    this._body = body;
+    this._length = body.length;
+  },
 
+  /*
+   * handshake buffer
+   */
+  toBuffer: function() {
+    var buf = new Buffer(3);
+    buf.writeUInt8(this.type, 0);
+    buf.writeUInt16BE(this.length, 1);
+    return Buffer.concat([buf, this.body]);
   }
 
 };
 
-function generateRandom() {
-  var buf = new Buffer(32);
-  buf.writeUint32BE(Date.now(), 0);
-  buf.fill('0', 4, 27);
+function writeRandom(buf, offset) {
+  buf.writeUInt32BE(0, offset);
+  buf.fill(0, offset + 4, offset + 27);
   return buf;
 }
 
