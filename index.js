@@ -147,9 +147,10 @@ exports.Handshake = {
    * handshake buffer
    */
   toBuffer: function() {
-    var buf = new Buffer(3);
+    var buf = new Buffer(4);
     buf.writeUInt8(this.type, 0);
-    buf.writeUInt16BE(this.length, 1);
+    buf.writeUInt8(0, 1);
+    buf.writeUInt16BE(this.length, 2);
     return Buffer.concat([buf, this.body]);
   }
 
