@@ -1,6 +1,6 @@
 {
   "name": "tls-handshake",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "handshake buffer generator in pure javascript",
   "main": "index.js",
   "scripts": {
@@ -23,6 +23,7 @@
   "homepage": "https://github.com/yorkie/node-tls-handshake",
   "dependencies": {
     "tape": "^2.12.3",
-    "tls-constants": "0.0.0"
+    "tls-constants": "0.0.0",
+    "buffer24": "0.0.2"
   }
 }

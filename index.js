@@ -1,4 +1,5 @@
 
+var Buffer = require('buffer24');
 var constants = require('tls-constants');
 var versions = constants.TLS.Versions;
 var types = constants.Handshake.Types;
@@ -149,8 +150,7 @@ exports.Handshake = {
   toBuffer: function() {
     var buf = new Buffer(4);
     buf.writeUInt8(this.type, 0);
-    buf.writeUInt8(0, 1);
-    buf.writeUInt16BE(this.length, 2);
+    buf.writeUInt24BE(this.length, 1);
     return Buffer.concat([buf, this.body]);
   }
 
