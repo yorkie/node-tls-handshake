@@ -74,22 +74,45 @@ exports.HelloMessage = {
    * handshake to buffer
    */
   toBuffer: function() {
-    var buf = new Buffer(40);
-    buf.writeUInt8(this.version[0], 0);
-    buf.writeUInt8(this.version[1], 1);
-    writeRandom(buf, 2);
+    var len = 0
+      // version
+      + 2
+      // random
+      + 32
+      // session   
+      + 2
+      // cipher suites
+      + 4
+      // compression
+      + 2
+      // extension
+      + 2;
 
-    buf.writeUInt8(0, 34);
-    buf.writeUInt8(this.ciphers[0], 35);
-    buf.writeUInt8(this.ciphers[1], 36);
-    if (this.compression) {
-      buf.writeUInt8(255, 37);
-    } else {
-      buf.writeUInt8(0, 37);
-    }
+    var buf = new Buffer(len);
+    var offset = 0;
 
-    buf.writeUInt8(0, 38);
-    buf.writeUInt8(0, 39);
+    // write version(2)
+    buf.writeUInt8(this.version[0], offset++);
+    buf.writeUInt8(this.version[1], offset++);
+    
+    // write random(32)
+    offset = writeRandom(buf, offset);
+
+    // write session(2)
+    buf.writeUInt8(0, offset++);
+
+    // write cipher suites(2+4)
+    buf.writeUInt16BE(0x02, offset); offset += 2;
+    // write data
+    buf.writeUInt16BE(0x0033, offset); offset += 2;
+
+    // write compression(2)
+    buf.writeUInt8(1, offset++);
+    buf.writeUInt8(0, offset++);
+
+    // write extension(2)
+    buf.writeUInt16BE(0, offset);
+    offset += 2;
     return buf;
   }
 
@@ -157,8 +180,11 @@ exports.Handshake = {
 };
 
 function writeRandom(buf, offset) {
-  buf.writeUInt32BE(0, offset);
-  buf.fill(0, offset + 4, offset + 27);
-  return buf;
+  var time = parseInt(Date.now()/1000);
+  buf.writeUInt32BE(time, offset);
+  offset += 4;
+  for (var i=0; i<28; i++) {
+    buf.writeUInt8(parseInt(Math.random()*255), offset++);
+  }
+  return offset;
 }
-
